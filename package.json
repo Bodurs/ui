@@ -1,0 +1,16 @@
+{
+  "name": "wallet-ui-main",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "vite": "^4.0.0",
+    "primereact": "^10.9.6",
+    "primeicons": "^7.0.0"
+  }
+}
