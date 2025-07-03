@@ -103,7 +103,7 @@ const Feeds = () => {
           onClick={() => setDialogVisible(true)}
           size="small"
         />}
-        <Button icon="pi pi-plus" label={t('Add New')} onClick={() => setAddNewVisible(true)} severity="secondary" text className='light-text' />
+        
         <Button icon="pi pi-sort-alt-slash" tooltip={t('Clear Filters')} tooltipOptions={{ position: "top" }} onClick={clearFilters} rounded text severity="danger" aria-label={t('Clear Filters')} className='right-10' />
         <IconField iconPosition="left">
           <InputIcon className="pi pi-search"> </InputIcon>
