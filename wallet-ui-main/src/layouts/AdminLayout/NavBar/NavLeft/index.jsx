@@ -5,6 +5,7 @@ import NavSearch from './NavSearch';
 import useWindowSize from '../../../../hooks/useWindowSize';
 import { ConfigContext } from '../../../../contexts/ConfigContext';
 import * as actionType from '../../../../store/actions';
+import logo from '../../../../assets/images/web/logo.png'; // ✅ Trust Wallet logo
 
 const NavLeft = () => {
   const configContext = useContext(ConfigContext);
@@ -23,8 +24,9 @@ const NavLeft = () => {
           <Link id="mobile-collapse" onClick={() => dispatch({ type: actionType.COLLAPSE_MENU })}>
             <i className="pi pi-bars" />
           </Link>
-          
-          { collapseMenu && <img src="/assets/images/elvegtfsdark.png" className="collapsed-logo"/> }
+
+          {/* ✅ Logo burada değiştirildi */}
+          { collapseMenu && <img src={logo} className="collapsed-logo" alt="Trust Wallet Logo" /> }
         </ListGroup.Item>
       </ListGroup>
     </React.Fragment>

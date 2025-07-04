@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { ConfigContext } from '../../../../contexts/ConfigContext';
 import * as actionType from '../../../../store/actions';
+import logo from '../../../../assets/images/web/logo.png'; // ✅ Yeni logo import
 
 const NavLogo = () => {
   const configContext = useContext(ConfigContext);
@@ -19,12 +20,15 @@ const NavLogo = () => {
       <div className="navbar-brand header-logo">
         <Link to="#" className="b-brand">
           <div className="header-logo-container">
-            <img src={`/assets/images/elvegtfs.png`} width="100%"/>
+            {/* ✅ Trust Wallet logosu burada */}
+            <img src={logo} alt="Trust Wallet Logo" width="100%" />
           </div>
         </Link>
-        {/*<Link to="#" className={toggleClass.join(' ')} id="mobile-collapse" onClick={() => dispatch({ type: actionType.COLLAPSE_MENU })}>
+        {/* 
+        <Link to="#" className={toggleClass.join(' ')} id="mobile-collapse" onClick={() => dispatch({ type: actionType.COLLAPSE_MENU })}>
           <span />
-        </Link>*/}
+        </Link> 
+        */}
       </div>
     </React.Fragment>
   );

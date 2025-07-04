@@ -7,6 +7,9 @@ import NavRight from './NavRight';
 import { ConfigContext } from '../../../contexts/ConfigContext';
 import * as actionType from '../../../store/actions';
 
+// ✅ Yeni logo import edildi
+import logo from '../../../assets/images/web/logo.png';
+
 const NavBar = () => {
   const [moreToggle, setMoreToggle] = useState(false);
   const configContext = useContext(ConfigContext);
@@ -28,7 +31,6 @@ const NavBar = () => {
   };
 
   let moreClass = ['mob-toggler'];
-
   let collapseClass = ['collapse navbar-collapse'];
   if (moreToggle) {
     moreClass = [...moreClass, 'on'];
@@ -43,7 +45,8 @@ const NavBar = () => {
         </Link>
         <Link to="#" className="b-brand">
           <div className="header-logo-container-mobile">
-            <img src="/assets/images/elvegtfs.png" width="100%"/>
+            {/* ✅ Yeni logo burada kullanılıyor */}
+            <img src={logo} alt="Logo" width="100%" />
           </div>
         </Link>
         <Link to="#" className={moreClass.join(' ')} onClick={() => setMoreToggle(!moreToggle)}>

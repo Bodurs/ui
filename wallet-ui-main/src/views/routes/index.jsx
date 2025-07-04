@@ -22,7 +22,7 @@ const Wallet = () => {
     status: { value: null, matchMode: FilterMatchMode.EQUALS }
   });
 
-  // Veri çekme
+ 
   useEffect(() => {
     fetchWallets();
   }, []);
@@ -30,7 +30,7 @@ const Wallet = () => {
   const fetchWallets = async () => {
     setLoading(true);
     try {
-      // API adresini kendi sistemine göre ayarla
+      
       const response = await ApiService.get('/api/0/v1/acc/wallets/get');
       if (response?.data?.data) {
         setWallets(response.data.data);
@@ -89,4 +89,4 @@ const Wallet = () => {
   );
 };
 
-export default Wallet;00000
+export default Wallet;

@@ -55,12 +55,12 @@ const routes = [
   },
   {
     path: '/',
-    layout: WebLayout,
+    layout: AdminLayout,
     routes: [
       {
         exact: 'true',
         path: '/',
-        element: lazy(() => import('./views/home'))
+        element: lazy(() => import('./views/feeds'))
       },
     ]
   },
