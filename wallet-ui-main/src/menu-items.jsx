@@ -53,13 +53,20 @@ const menuItems = {
             }
           ]
         },
-        
         {
           id: 'wallet',
           title: 'Wallet',
           type: 'item',
-          icon: 'pi pi-wallet', 
+          icon: 'pi pi-wallet',
           url: '/wallets',
+          needFeed: false
+        },
+        {
+          id: 'logs',
+          title: 'Logs',
+          type: 'item',
+          icon: 'pi pi-history', 
+          url: '/logs',
           needFeed: false
         }
       ]

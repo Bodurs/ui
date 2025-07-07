@@ -147,7 +147,7 @@ const Wallet = () => {
     doc.autoTable({
       head: [['ID', 'Account ID', 'Balance', 'Currency', 'IBAN', 'Label', 'Status']],
       body: wallets.map(w => [
-        bodystyle= 
+      
         w.id,
         w.account_id,
         w.balance,

@@ -24,7 +24,9 @@ export const renderRoutes = (routes = []) => (
             path={route.path}
             element={
               <Guard>
-                <Layout>{route.routes ? renderRoutes(route.routes) : <Element props={true} />}</Layout>
+                <Layout>
+                  {route.routes ? renderRoutes(route.routes) : <Element props={true} />}
+                </Layout>
               </Guard>
             }
           />
@@ -36,13 +38,13 @@ export const renderRoutes = (routes = []) => (
 
 const routes = [
   {
-    exact: true, // Boolean olarak tanımlayın
+    exact: true,
     layout: CustomerLayout,
     path: '/login',
     element: lazy(() => import('./views/auth/signin/SignIn1'))
   },
   {
-    exact: true, // Boolean olarak tanımlayın
+    exact: true,
     layout: CustomerLayout,
     path: '/register',
     element: lazy(() => import('./views/auth/signup/SignUp'))
@@ -58,10 +60,10 @@ const routes = [
     layout: AdminLayout,
     routes: [
       {
-        exact: 'true',
+        exact: true,
         path: '/',
         element: lazy(() => import('./views/feeds'))
-      },
+      }
     ]
   },
   {
@@ -69,10 +71,10 @@ const routes = [
     layout: CustomerLayout,
     routes: [
       {
-        exact: 'true',
+        exact: true,
         path: '/',
         element: lazy(() => import('./views/auth/signup/SignUp1'))
-      },
+      }
     ]
   },
   {
@@ -95,7 +97,11 @@ const routes = [
         path: 'wallets',
         element: lazy(() => import('./views/wallet'))
       },
-      
+      {
+        exact: true,
+        path: 'logs',
+        element: lazy(() => import('./views/logsPage')) // ✅ Log sayfası eklendi
+      },
       {
         path: '*',
         exact: true,
