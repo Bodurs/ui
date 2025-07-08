@@ -20,43 +20,98 @@ const LogPage = () => {
   const exportMenu = useRef(null);
 
   const [logs, setLogs] = useState([]);
-  const [dateRange, setDateRange] = useState([null, null]);
+  const [filteredLogs, setFilteredLogs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     id: { value: null, matchMode: FilterMatchMode.CONTAINS },
     user_id: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    action: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    created_at: { value: null, matchMode: FilterMatchMode.BETWEEN }
+    action: { value: null, matchMode: FilterMatchMode.CONTAINS }
   });
 
   const getLogs = async () => {
+    setLoading(true);
     try {
       const res = await ApiService.get('/api/0/v1/acc/accauditlog/get');
-      setLogs(res.data.data || []);
+      const logsData = res.data.data || [];
+      setLogs(logsData);
+      setFilteredLogs(logsData);
     } catch (error) {
+      console.error('Log fetch error:', error);
       toast.current?.show({
         severity: 'error',
         summary: 'Hata',
         detail: 'Log verileri alınamadı',
         life: 3000
       });
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Tarih filtreleme fonksiyonu
+  const filterByDate = () => {
+    let filtered = [...logs];
+    
+    if (startDate && endDate) {
+      filtered = logs.filter(log => {
+        if (!log.created_at) return false;
+        
+        const logDate = new Date(log.created_at);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        // Günün başı ve sonu için
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        
+        return logDate >= start && logDate <= end;
+      });
+    } else if (startDate) {
+      filtered = logs.filter(log => {
+        if (!log.created_at) return false;
+        
+        const logDate = new Date(log.created_at);
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        
+        return logDate >= start;
+      });
+    } else if (endDate) {
+      filtered = logs.filter(log => {
+        if (!log.created_at) return false;
+        
+        const logDate = new Date(log.created_at);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        
+        return logDate <= end;
+      });
+    }
+    
+    setFilteredLogs(filtered);
   };
 
   useEffect(() => {
     getLogs();
   }, []);
 
+  useEffect(() => {
+    filterByDate();
+  }, [startDate, endDate, logs]);
+
   const clearFilters = () => {
     setFilters({
       global: { value: null, matchMode: FilterMatchMode.CONTAINS },
       id: { value: null, matchMode: FilterMatchMode.CONTAINS },
       user_id: { value: null, matchMode: FilterMatchMode.CONTAINS },
-      action: { value: null, matchMode: FilterMatchMode.CONTAINS },
-      created_at: { value: null, matchMode: FilterMatchMode.BETWEEN }
+      action: { value: null, matchMode: FilterMatchMode.CONTAINS }
     });
-    setDateRange([null, null]);
+    setStartDate(null);
+    setEndDate(null);
 
     toast.current?.show({
       severity: 'success',
@@ -67,29 +122,49 @@ const LogPage = () => {
   };
 
   const exportCSV = () => {
-    dt.current.exportCSV();
+    dt.current?.exportCSV();
   };
 
   const exportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(logs);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Logs');
-    XLSX.writeFile(workbook, 'logs.xlsx');
+    try {
+      const worksheet = XLSX.utils.json_to_sheet(filteredLogs);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Logs');
+      XLSX.writeFile(workbook, 'logs.xlsx');
+    } catch (error) {
+      console.error('Excel export error:', error);
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Hata',
+        detail: 'Excel export işlemi başarısız',
+        life: 3000
+      });
+    }
   };
 
   const exportPdf = () => {
-    const doc = new jsPDF();
-    doc.autoTable({
-      head: [['ID', 'User ID', 'Action', 'Details', 'Created At']],
-      body: logs.map(log => [
-        log.id,
-        log.user_id,
-        log.action,
-        log.details,
-        log.created_at
-      ])
-    });
-    doc.save('logs.pdf');
+    try {
+      const doc = new jsPDF();
+      doc.autoTable({
+        head: [['ID', 'User ID', 'Action', 'Details', 'Created At']],
+        body: filteredLogs.map(log => [
+          log.id,
+          log.user_id,
+          log.action,
+          log.details,
+          log.created_at
+        ])
+      });
+      doc.save('logs.pdf');
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Hata',
+        detail: 'PDF export işlemi başarısız',
+        life: 3000
+      });
+    }
   };
 
   const exportButtons = [
@@ -98,20 +173,23 @@ const LogPage = () => {
     { label: 'PDF Export', icon: 'pi pi-file-pdf', command: exportPdf }
   ];
 
-  const dateRangeFilterTemplate = (options) => (
-    <Calendar
-      value={dateRange}
-      onChange={(e) => {
-        setDateRange(e.value);
-        options.filterApplyCallback(e.value);
-      }}
-      selectionMode="range"
-      placeholder="Tarih aralığı seç"
-      dateFormat="yy-mm-dd"
-      showIcon
-      className="p-column-filter"
-    />
-  );
+  // Tarih formatı için body template
+  const dateBodyTemplate = (rowData) => {
+    if (!rowData.created_at) return '-';
+    
+    try {
+      const date = new Date(rowData.created_at);
+      return date.toLocaleString('tr-TR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return rowData.created_at;
+    }
+  };
 
   const header = (
     <div className="flex justify-content-between align-items-center">
@@ -122,7 +200,7 @@ const LogPage = () => {
           icon="pi pi-download"
           tooltip="Dışa Aktar"
           tooltipOptions={{ position: 'top' }}
-          onClick={(e) => exportMenu.current.toggle(e)}
+          onClick={(e) => exportMenu.current?.toggle(e)}
           rounded
           text
           severity="info"
@@ -157,35 +235,81 @@ const LogPage = () => {
     </div>
   );
 
+  const dateFilterHeader = (
+    <div className="flex gap-2 align-items-center">
+      <Calendar
+        value={startDate}
+        onChange={(e) => setStartDate(e.value)}
+        placeholder="Başlangıç"
+        dateFormat="dd/mm/yy"
+        showIcon
+        className="p-inputtext-sm"
+      />
+      <Calendar
+        value={endDate}
+        onChange={(e) => setEndDate(e.value)}
+        placeholder="Bitiş"
+        dateFormat="dd/mm/yy"
+        showIcon
+        className="p-inputtext-sm"
+      />
+    </div>
+  );
+
   return (
     <div className="card">
       <Toast ref={toast} />
       <DataTable
         ref={dt}
-        value={logs}
+        value={filteredLogs}
         paginator
         rows={10}
+        loading={loading}
         filters={filters}
         onFilter={(e) => setFilters(e.filters)}
-        globalFilterFields={['id', 'user_id', 'action', 'created_at']}
+        globalFilterFields={['id', 'user_id', 'action']}
         header={header}
         emptyMessage="Log bulunamadı."
         showGridlines
         stripedRows
         scrollable
       >
-        <Column field="id" header="ID" filter filterPlaceholder="ID ile Ara" sortable />
-        <Column field="user_id" header="User ID" filter filterPlaceholder="User ID ile Ara" sortable />
-        <Column field="action" header="Action" filter filterPlaceholder="Action ile Ara" sortable />
-        <Column field="details" header="Details" sortable />
+        <Column 
+          field="id" 
+          header="ID" 
+          filter 
+          filterPlaceholder="ID ile Ara" 
+          sortable 
+          style={{ minWidth: '120px' }}
+        />
+        <Column 
+          field="user_id" 
+          header="User ID" 
+          filter 
+          filterPlaceholder="User ID ile Ara" 
+          sortable 
+          style={{ minWidth: '150px' }}
+        />
+        <Column 
+          field="action" 
+          header="Action" 
+          filter 
+          filterPlaceholder="Action ile Ara" 
+          sortable 
+          style={{ minWidth: '120px' }}
+        />
+        <Column 
+          field="details" 
+          header="Details" 
+          sortable 
+          style={{ minWidth: '200px' }}
+        />
         <Column
           field="created_at"
-          header="Created At"
-          filter
+          header={dateFilterHeader}
+          body={dateBodyTemplate}
           sortable
-          dataType="date"
-          filterMatchMode="between"
-          filterElement={dateRangeFilterTemplate}
+          style={{ minWidth: '250px' }}
         />
       </DataTable>
     </div>

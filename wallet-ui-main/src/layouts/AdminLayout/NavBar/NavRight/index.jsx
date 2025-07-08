@@ -38,8 +38,8 @@ const NavRight = () => {
   const [listOpen, setListOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [me, setMe] = useState({});
-  const [gtfsFiles, setGtfsFiles] = useState([]);
-  const [gtfsFileId, setGtfsFileId] = useState(null);
+  // const [gtfsFiles, setGtfsFiles] = useState([]);
+  // const [gtfsFileId, setGtfsFileId] = useState(null);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [notifications, setNotifications] = useState([
@@ -63,11 +63,11 @@ const NavRight = () => {
     }
   ]);
 
-  useEffect(() => {
-    getMe();
-    getGtfsFiles();
-    setGtfsFileId(Cookies.get('feed_id'));
-  }, []);
+  // useEffect(() => {
+  //   getMe();
+  //   getGtfsFiles();
+  //   setGtfsFileId(Cookies.get('feed_id'));
+  // }, []);
 
   const handleChangeLanguage = (lng) => {
     setShowLangDropdown(false);
@@ -94,14 +94,14 @@ const NavRight = () => {
     }
   }
 
-  async function getGtfsFiles() {
-    try {
-      const response = await ApiService.get('/api/0/v1/gtfs/feeds/get');
-      setGtfsFiles(response.data.data);
-    } catch (error) {
-      throw error;
-    }
-  }
+  // async function getGtfsFiles() {
+  //   try {
+  //     const response = await ApiService.get('/api/0/v1/gtfs/feeds/get');
+  //     setGtfsFiles(response.data.data);
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 
   const changeGtfsFile = async (fileId) => {
     await ApiService.post('/api/0/v1/base/user/changefeed', { feed_id: fileId });

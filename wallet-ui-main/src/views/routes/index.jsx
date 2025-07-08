@@ -5,7 +5,7 @@ import { FilterMatchMode } from 'primereact/api';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
-import ApiService from '../../services/ApiService';  // Senin API servis dosyan
+import ApiService from '../../services/ApiService';  
 
 const Wallet = () => {
   const toast = useRef(null);
