@@ -179,7 +179,7 @@ const Wallet = () => {
           onClick={(e) => exportMenu.current.toggle(e)}
           rounded
           text
-          severity="info"
+          severity="secondary"
           aria-label="Dışa Aktar"
         />
         <Button

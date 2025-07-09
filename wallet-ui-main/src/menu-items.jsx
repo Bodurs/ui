@@ -68,7 +68,17 @@ const menuItems = {
           icon: 'pi pi-history', 
           url: '/logs',
           needFeed: false
+        },
+
+        {
+          id: 'dashboard',
+          title: 'Dashboard',
+          type: 'item',
+          icon: 'pi pi-th-large',
+          url:'/dashboard',
+          needFeed: false
         }
+        
       ]
     }
   ]

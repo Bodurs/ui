@@ -12,6 +12,7 @@ import { Calendar } from 'primereact/calendar';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import moment from 'moment';
 import ApiService from '../../services/ApiService';
 
 const LogPage = () => {
@@ -29,7 +30,8 @@ const LogPage = () => {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     id: { value: null, matchMode: FilterMatchMode.CONTAINS },
     user_id: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    action: { value: null, matchMode: FilterMatchMode.CONTAINS }
+    action: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    created_at: { value: null, matchMode: FilterMatchMode.DATE_IS }
   });
 
   const getLogs = async () => {
@@ -52,46 +54,21 @@ const LogPage = () => {
     }
   };
 
-  // Tarih filtreleme fonksiyonu
   const filterByDate = () => {
     let filtered = [...logs];
-    
     if (startDate && endDate) {
       filtered = logs.filter(log => {
         if (!log.created_at) return false;
-        
         const logDate = new Date(log.created_at);
         const start = new Date(startDate);
         const end = new Date(endDate);
-        
-        // Günün başı ve sonu için
         start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
-        
         return logDate >= start && logDate <= end;
       });
-    } else if (startDate) {
-      filtered = logs.filter(log => {
-        if (!log.created_at) return false;
-        
-        const logDate = new Date(log.created_at);
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        
-        return logDate >= start;
-      });
-    } else if (endDate) {
-      filtered = logs.filter(log => {
-        if (!log.created_at) return false;
-        
-        const logDate = new Date(log.created_at);
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        
-        return logDate <= end;
-      });
+    } else {
+      filtered = logs;
     }
-    
     setFilteredLogs(filtered);
   };
 
@@ -108,11 +85,11 @@ const LogPage = () => {
       global: { value: null, matchMode: FilterMatchMode.CONTAINS },
       id: { value: null, matchMode: FilterMatchMode.CONTAINS },
       user_id: { value: null, matchMode: FilterMatchMode.CONTAINS },
-      action: { value: null, matchMode: FilterMatchMode.CONTAINS }
+      action: { value: null, matchMode: FilterMatchMode.CONTAINS },
+      created_at: { value: null, matchMode: FilterMatchMode.DATE_IS }
     });
     setStartDate(null);
     setEndDate(null);
-
     toast.current?.show({
       severity: 'success',
       summary: 'Başarılı',
@@ -173,22 +150,21 @@ const LogPage = () => {
     { label: 'PDF Export', icon: 'pi pi-file-pdf', command: exportPdf }
   ];
 
-  // Tarih formatı için body template
-  const dateBodyTemplate = (rowData) => {
-    if (!rowData.created_at) return '-';
-    
-    try {
-      const date = new Date(rowData.created_at);
-      return date.toLocaleString('tr-TR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch (error) {
-      return rowData.created_at;
-    }
+  const dateFilterTemplate = (options) => {
+    return (
+      <Calendar
+        value={options.value}
+        onChange={(e) => {
+          options.filterCallback(e.value);
+          setStartDate(e.value);
+          setEndDate(e.value);
+        }}
+        dateFormat="mm/dd/yy"
+        placeholder="mm/dd/yyyy"
+        showIcon
+        className="p-inputtext-sm"
+      />
+    );
   };
 
   const header = (
@@ -203,7 +179,7 @@ const LogPage = () => {
           onClick={(e) => exportMenu.current?.toggle(e)}
           rounded
           text
-          severity="info"
+          severity="secondary"
         />
         <Button
           icon="pi pi-filter-slash"
@@ -235,27 +211,6 @@ const LogPage = () => {
     </div>
   );
 
-  const dateFilterHeader = (
-    <div className="flex gap-2 align-items-center">
-      <Calendar
-        value={startDate}
-        onChange={(e) => setStartDate(e.value)}
-        placeholder="Başlangıç"
-        dateFormat="dd/mm/yy"
-        showIcon
-        className="p-inputtext-sm"
-      />
-      <Calendar
-        value={endDate}
-        onChange={(e) => setEndDate(e.value)}
-        placeholder="Bitiş"
-        dateFormat="dd/mm/yy"
-        showIcon
-        className="p-inputtext-sm"
-      />
-    </div>
-  );
-
   return (
     <div className="card">
       <Toast ref={toast} />
@@ -274,41 +229,45 @@ const LogPage = () => {
         stripedRows
         scrollable
       >
-        <Column 
-          field="id" 
-          header="ID" 
-          filter 
-          filterPlaceholder="ID ile Ara" 
-          sortable 
+        <Column
+          field="id"
+          header="ID"
+          filter
+          filterPlaceholder="ID ile Ara"
+          sortable
           style={{ minWidth: '120px' }}
         />
-        <Column 
-          field="user_id" 
-          header="User ID" 
-          filter 
-          filterPlaceholder="User ID ile Ara" 
-          sortable 
+        <Column
+          field="user_id"
+          header="User ID"
+          filter
+          filterPlaceholder="User ID ile Ara"
+          sortable
           style={{ minWidth: '150px' }}
         />
-        <Column 
-          field="action" 
-          header="Action" 
-          filter 
-          filterPlaceholder="Action ile Ara" 
-          sortable 
+        <Column
+          field="action"
+          header="Action"
+          filter
+          filterPlaceholder="Action ile Ara"
+          sortable
           style={{ minWidth: '120px' }}
         />
-        <Column 
-          field="details" 
-          header="Details" 
-          sortable 
+        <Column
+          field="details"
+          header="Details"
+          sortable
           style={{ minWidth: '200px' }}
         />
         <Column
           field="created_at"
-          header={dateFilterHeader}
-          body={dateBodyTemplate}
+          header="Created At"
+          dataType="date"
+          filterField="created_at"
+          filter
+          filterElement={dateFilterTemplate}
           sortable
+          body={(rowData) => moment(rowData.created_at).format('DD.MM.YYYY')}
           style={{ minWidth: '250px' }}
         />
       </DataTable>

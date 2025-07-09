@@ -14,6 +14,8 @@ const DashDefault = () => {
   const [last7Days, setLast7Days] = useState([]);
   const [last12Month, setLast12Month] = useState([]);
 
+  
+
   const last12ChartData = {
     labels: last12Month.map(item => moment(item.mounth, 'YYYYMM').format('MMM YYYY')),
     datasets: [
@@ -139,7 +141,7 @@ const DashDefault = () => {
   async function getStats() {
     setLoading(true);
     try {
-      const response = await ApiService.get('/api/0/v1/ev/dashboard/stats');
+      const response = await ApiService.get('/api/0/v1/acc/dashboard/stats');
       setStats(response.data);
       setLoading(false);
     } catch (error) {
@@ -152,7 +154,7 @@ const DashDefault = () => {
   async function getLast12Months() {
     setLoading(true);
     try {
-      const response = await ApiService.get('/api/0/v1/ev/dashboard/last12Month');
+      const response = await ApiService.get('/api/0/v1/acc/dashboard/last12Month');
       console.log("respsns", response.data.data);
       setLast12Month(response.data.data);
       setLoading(false);
@@ -166,7 +168,7 @@ const DashDefault = () => {
   async function getLast7Days() {
     setLoading(true);
     try {
-      const response = await ApiService.get('/api/0/v1/ev/dashboard/last7Day');
+      const response = await ApiService.get('/api/0/v1/acc/dashboard/last7Day');
       setLast7Days(response.data.data);
       setLoading(false);
     } catch (error) {
@@ -181,72 +183,87 @@ const DashDefault = () => {
       <Row>
 
         <div className="surface-ground px-4 py-5 md:px-6 lg:px-8">
-          <div className="grid">
-            <Col key={`customer-stats`} xs={12} md={6} lg={4} xl={4} xxl={4} className="dashboard-stat-card" onClick={() => navigate('/customers')}>
-              <div className="surface-card shadow-2 p-3 border-round">
-                <div className="flex justify-content-between mb-3">
-                  <div>
-                    <span className="block text-500 font-medium mb-3">Customer</span>
-                    <div className="text-900 font-medium text-xl">{stats?.customers}</div>
-                  </div>
-                  <div className="flex align-items-center justify-content-center bg-blue-100 border-round" style={{ width: '2.5rem', height: '2.5rem' }}>
-                    <i className="pi pi-briefcase text-blue-500 text-xl"></i>
-                  </div>
-                </div>
-              </div>
-            </Col>
-            <Col key={`terminal-stats`} xs={12} md={6} lg={4} xl={4} xxl={4} className="dashboard-stat-card" onClick={() => navigate('/terminal')}>
-              <div className="surface-card shadow-2 p-3 border-round">
-                <div className="flex justify-content-between mb-3">
-                  <div>
-                    <span className="block text-500 font-medium mb-3">Terminals</span>
-                    <div className="text-900 font-medium text-xl">{stats?.terminals}</div>
-                  </div>
-                  <div className="flex align-items-center justify-content-center bg-orange-100 border-round" style={{ width: '2.5rem', height: '2.5rem' }}>
-                    <i className="pi pi-mobile text-orange-500 text-xl"></i>
-                  </div>
-                </div>
-              </div>
-            </Col>
-            <Col key={`organization-stats`} xs={12} md={6} lg={4} xl={4} xxl={4} className="dashboard-stat-card" onClick={() => navigate('/regions')}>
-              <div className="surface-card shadow-2 p-3 border-round">
-                <div className="flex justify-content-between mb-3">
-                  <div>
-                    <span className="block text-500 font-medium mb-3">Regions</span>
-                    <div className="text-900 font-medium text-xl">{stats?.organization_regions}</div>
-                  </div>
-                  <div className="flex align-items-center justify-content-center bg-cyan-100 border-round" style={{ width: '2.5rem', height: '2.5rem' }}>
-                    <i className="pi pi-map text-cyan-500 text-xl"></i>
-                  </div>
-                </div>
-              </div>
-            </Col>
+  <div className="grid">
+
+   
+    <Col xs={12} md={6} lg={3} xl={3} xxl={3} className="dashboard-stat-card">
+      <div className="surface-card shadow-2 p-3 border-round">
+        <div className="flex justify-content-between mb-3">
+          <div>
+            <span className="block text-500 font-medium mb-3">Users</span>
+            <div className="text-900 font-medium text-xl">{stats?.users}</div>
+          </div>
+          <div className="flex align-items-center justify-content-center bg-purple-100 border-round" style={{ width: '2.5rem', height: '2.5rem' }}>
+            <i className="pi pi-users text-purple-500 text-xl"></i>
           </div>
         </div>
+      </div>
+    </Col>
+
+    
+    <Col xs={12} md={6} lg={3} xl={3} xxl={3} className="dashboard-stat-card">
+      <div className="surface-card shadow-2 p-3 border-round">
+        <div className="flex justify-content-between mb-3">
+          <div>
+            <span className="block text-500 font-medium mb-3">Wallets</span>
+            <div className="text-900 font-medium text-xl">{stats?.wallets}</div>
+          </div>
+          <div className="flex align-items-center justify-content-center bg-teal-100 border-round" style={{ width: '2.5rem', height: '2.5rem' }}>
+            <i className="pi pi-wallet text-teal-500 text-xl"></i>
+          </div>
+        </div>
+      </div>
+    </Col>
+
+    
+    <Col xs={12} md={6} lg={3} xl={3} xxl={3} className="dashboard-stat-card">
+      <div className="surface-card shadow-2 p-3 border-round">
+        <div className="flex justify-content-between mb-3">
+          <div>
+            <span className="block text-500 font-medium mb-3">Cards</span>
+            <div className="text-900 font-medium text-xl">{stats?.cards}</div>
+          </div>
+          <div className="flex align-items-center justify-content-center bg-indigo-100 border-round" style={{ width: '2.5rem', height: '2.5rem' }}>
+            <i className="pi pi-credit-card text-indigo-500 text-xl"></i>
+          </div>
+        </div>
+      </div>
+    </Col>
+
+   
+    <Col xs={12} md={6} lg={3} xl={3} xxl={3} className="dashboard-stat-card">
+      <div className="surface-card shadow-2 p-3 border-round"> 
+        <div className="flex justify-content-between mb-3">
+          <div>
+            <span className="block text-500 font-medium mb-3">KYC Completed</span>
+            <div className="text-900 font-medium text-xl">{stats?.kyc_completed}</div>
+          </div>
+          <div className="flex align-items-center justify-content-center bg-green-100 border-round" style={{ width: '2.5rem', height: '2.5rem' }}>
+            <i className="pi pi-check-circle text-green-500 text-xl"></i>
+          </div>
+        </div>
+      </div>
+    </Col>
+
+  </div>
+</div>
+ 
+
 
       </Row>
-      <Row>
+      <Row className="mt-4">
+  <Col xs={12}>
+    <Card>
+      <Card.Header>
+        <h5 className="mb-0">Transactions (Last 12 Months)</h5>
+      </Card.Header>
+      <Card.Body>
+        <Chart type="line" data={last12ChartData} options={last12ChartOptions} />
+      </Card.Body>
+    </Card>
+  </Col>
 
-        <Col key={`line-chart-stats`} md={12} xl={6} xxl={6}>
-          <Card>
-            <Card.Header>
-              Last 7 Days
-            </Card.Header>
-            <Card.Body>
-              <Chart type="line" data={last7ChartData} options={last7ChartOptions} />
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col key={`line-chart-stats`} md={12} xl={6} xxl={6}>
-          <Card>
-          <Card.Header>
-              Last 12 Months
-            </Card.Header>
-            <Card.Body>
-              <Chart type="line" data={last12ChartData} options={last12ChartOptions} />
-            </Card.Body>
-          </Card>
-        </Col>
+
         {/*
         <Col md={6} xl={8}>
           <Card className="Recent-Users widget-focus-lg">
