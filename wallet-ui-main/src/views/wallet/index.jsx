@@ -13,7 +13,6 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import ApiService from '../../services/ApiService';
-import { Color } from 'maplibre-gl';
 
 const Wallet = () => {
   const toast = useRef(null);
@@ -32,9 +31,7 @@ const Wallet = () => {
     status: { value: null, matchMode: FilterMatchMode.EQUALS },
     iban: { value: null, matchMode: FilterMatchMode.CONTAINS },
     label: { value: null, matchMode: FilterMatchMode.CONTAINS }
-    
-  }
-);
+  });
 
   const currencyOptions = [
     { label: 'USD', value: 'USD' },
@@ -43,8 +40,8 @@ const Wallet = () => {
   ];
 
   const statusOptions = [
-    { label: 'Active', value: 'Active' },
-    { label: 'Inactive', value: 'Inactive' }
+    { label: 'Active', value: 1 },
+    { label: 'Inactive', value: 0 }
   ];
 
   const currencyFilterTemplate = (options) => (
@@ -57,6 +54,21 @@ const Wallet = () => {
       showClear
     />
   );
+
+  const statusFilterTemplate = (options) => (
+    <Dropdown
+      value={options.value}
+      options={statusOptions}
+      onChange={(e) => options.filterCallback(e.value)}
+      placeholder="Status"
+      className="p-column-filter"
+      showClear
+    />
+  );
+
+  const statusBodyTemplate = (rowData) => {
+    return rowData.status === 1 ? 'Active' : 'Inactive';
+  };
 
   const formatCurrency = (value, currency = 'USD') => {
     try {
@@ -119,18 +131,6 @@ const Wallet = () => {
     </div>
   );
 
-  const statusFilterTemplate = (options) => (
-    <Dropdown
-      value={options.value}
-      options={statusOptions}
-      onChange={(e) => options.filterCallback(e.value)}
-      placeholder="Status"
-      className="p-column-filter"
-      showClear
-    />
-  );
-
-  // Export Fonksiyonları
   const exportCSV = () => {
     dt.current.exportCSV();
   };
@@ -147,7 +147,6 @@ const Wallet = () => {
     doc.autoTable({
       head: [['ID', 'Account ID', 'Balance', 'Currency', 'IBAN', 'Label', 'Status']],
       body: wallets.map(w => [
-      
         w.id,
         w.account_id,
         w.balance,
@@ -155,7 +154,6 @@ const Wallet = () => {
         w.iban,
         w.label,
         w.status
-        
       ])
     });
     doc.save('wallets.pdf');
@@ -212,51 +210,23 @@ const Wallet = () => {
     </div>
   );
 
-  useEffect(() => {
-    ApiService.get('/api/0/v1/acc/accwallet/get')
-      .then((res) => {
-        if (res.data.success && res.data.data.length > 0) {
-          setWallets(res.data.data);
-        } else {
-       
-          setWallets([
-            {
-              id: 1,
-              account_id: '001',
-              balance: 1000,
-              currency: 'USD',
-              iban: 'US1234567890',
-              label: 'Wallet',
-              status: 'Active'
-            },
-            {
-              id: 2,
-              account_id: '002',
-              balance: 500,
-              currency: 'EUR',
-              iban: 'EU0987654321',
-              label: 'Wallet',
-              status: 'Inactive'
-            }
-          ]);
-        }
-      })
-      .catch((err) => {
-        console.error('API error:', err);
-      
-        setWallets([
-          {
-            id: 1,
-            account_id: '001',
-            balance: 1000,
-            currency: 'USD',
-            iban: 'US1234567890',
-            label: 'Wallet',
-            status: 'Active'
-          }
-        ]);
-      });
-  }, []);
+ useEffect(() => {
+  const fetchWallets = async () => {
+    try {
+      const response = await ApiService.get('/api/0/v1/acc/accwallet/get');
+      const cleanedData = response.data.data.map(w => ({
+        ...w,
+        status: Number(w.status) // <-- BURASI ÖNEMLİ
+      }));
+      setWallets(cleanedData);
+    } catch (error) {
+      console.error('API error:', error);
+    }
+  };
+
+  fetchWallets();
+}, []);
+
 
   return (
     <div>
@@ -286,7 +256,15 @@ const Wallet = () => {
         <Column field="currency" header="Currency" filter filterElement={currencyFilterTemplate} showFilterMenuOptions={false} />
         <Column field="iban" header="IBAN" filter filterPlaceholder="IBAN ile Ara" showFilterMenuOptions={false} />
         <Column field="label" header="Label" filter filterPlaceholder="Label ile Ara" showFilterMenuOptions={false} />
-        <Column field="status" header="Status" filter filterField="status" filterElement={statusFilterTemplate} showFilterMenuOptions={false} />
+        <Column
+          field="status"
+          header="Status"
+          body={statusBodyTemplate}
+          filter
+          filterField="status"
+          filterElement={statusFilterTemplate}
+          showFilterMenuOptions={false}
+        />
       </DataTable>
     </div>
   );

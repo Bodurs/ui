@@ -1,8 +1,8 @@
-
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3002' : '';
+
 // Axios instance oluştur
 const apiInstance = axios.create({
   baseURL: BASE_URL,
@@ -27,13 +27,12 @@ apiInstance.interceptors.request.use(
 
 apiInstance.interceptors.response.use(
   (response) => {
-    return response.data; // Sadece yanıtın data kısmını döndür
+    // Tam response'u döndür, sadece data kısmını değil
+    return response; // Bu değişti!
   },
   async (error) => {
     if (error.response?.status === 401) {
-      // Token yenileme mantığını burada ele alabilirsiniz
       console.error('Unauthorized - Access token expired or invalid');
-      // Örn: Kullanıcıyı login sayfasına yönlendirin
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -42,7 +41,7 @@ apiInstance.interceptors.response.use(
 
 const streamPost = async (url, data) => {
   const token = Cookies.get('access_token');
-
+  
   const response = await fetch(BASE_URL + url, {
     method: 'POST',
     headers: {
@@ -51,13 +50,14 @@ const streamPost = async (url, data) => {
     },
     body: JSON.stringify(data)
   });
-
+  
   if (!response.ok) {
     throw new Error('Stream isteği başarısız');
   }
-
+  
   return response;
 };
+
 const ApiService = {
   get: (url, params = {}) => apiInstance.get(url, { params }),
   post: (url, data) => apiInstance.post(url, data),
@@ -71,6 +71,6 @@ const ApiService = {
       }
     }),
   streamPost
-  };
+};
 
 export default ApiService;
