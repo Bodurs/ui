@@ -27,8 +27,8 @@ apiInstance.interceptors.request.use(
 
 apiInstance.interceptors.response.use(
   (response) => {
-    // Tam response'u döndür, sadece data kısmını değil
-    return response; // Bu değişti!
+   
+    return response; 
   },
   async (error) => {
     if (error.response?.status === 401) {
